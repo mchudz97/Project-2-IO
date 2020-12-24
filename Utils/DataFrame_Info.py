@@ -10,3 +10,4 @@ def info_about_column(df: pd.DataFrame, column_identity):
         'Avg': column.mean(),
         'Freq': column.value_counts().to_dict()
     }
+
