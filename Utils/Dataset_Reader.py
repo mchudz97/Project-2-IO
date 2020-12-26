@@ -8,7 +8,10 @@ NUMERICS = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
 def return_numerical_columns(df: DataFrame, result_column: DataFrame,  exclude: [] = None):
     df_num = df.select_dtypes(include=NUMERICS)
     if exclude:
-        return df_num.drop(exclude, axis=1).append(result_column)
+        for ex in exclude:
+            df_num = df_num.drop(ex, axis=1)
+
+    df_num = df_num.join(result_column)
     return df_num
 
 

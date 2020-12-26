@@ -21,10 +21,15 @@ def remove_nulls_from_y(data: pd.DataFrame, y_name):
     return data.dropna(subset=[y_name])
 
 
-def fill_nulls_with_medians(df: pd.DataFrame, numeric_df: pd.DataFrame, y_name):
+def fill_nulls_with_medians(df: pd.DataFrame, numeric_df: pd.DataFrame, y_name: str):
     df_num = numeric_df.copy()
     for col in numeric_df.columns.values:
-        df_num[col] = df[col].fillna(df.groupby(y_name)[col].transform('mean'))
+        if col == y_name:
+            continue
+        if len(df.groupby(y_name)[col]) >= 2:
+            df_num[col] = df[col].fillna(df.groupby(y_name)[col].transform('mean'))
+        else:
+            df_num[col] = df[col].fillna(df[col].median)
 
     return df_num
 
@@ -54,15 +59,15 @@ def create_encoded_df(df_str: pd.DataFrame):
     return ohe_df
 
 
-d = DatasetReader('..\\dataset.xlsx').return_df_without_first_column()
-d = reduce_null_columns(d, .80)
-d = remove_nulls_from_y(d, 'SARS-Cov-2 exam result')
-dn = fill_nulls_with_medians(d, return_numerical_columns(d), 'SARS-Cov-2 exam result')
-ds = return_str_columns(d)
-
+# d = DatasetReader('..\\dataset.xlsx').return_df_without_first_column()
+# d = reduce_null_columns(d, .80)
+# d = remove_nulls_from_y(d, 'SARS-Cov-2 exam result')
+# dn = fill_nulls_with_medians(d, return_numerical_columns(d, d['SARS-Cov-2 exam result']), 'SARS-Cov-2 exam result')
+# ds = return_str_columns(d, d['SARS-Cov-2 exam result'])
+#
 # print(dn.shape)
 # for c in ds:
 #     print(ds[c].unique())
-ds = fill_nulls_with_word(ds, 'not_tested')
-print(ds.isnull().sum())
-print(create_encoded_df(ds))
+# ds = fill_nulls_with_word(ds, 'not_tested')
+# print(dn.isnull().sum())
+# print(create_encoded_df(ds))
