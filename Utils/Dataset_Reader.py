@@ -5,12 +5,15 @@ EXCEL_TYPES = ['xls', 'xlsx', 'xlsm', 'xlsb', 'odf', 'ods', 'odt']
 NUMERICS = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
 
 
-def return_numerical_columns(df: DataFrame):
-    return df.select_dtypes(include=NUMERICS)
+def return_numerical_columns(df: DataFrame, result_column: DataFrame,  exclude: [] = None):
+    df_num = df.select_dtypes(include=NUMERICS)
+    if exclude:
+        return df_num.drop(exclude, axis=1).append(result_column)
+    return df_num
 
 
-def return_str_columns(df: DataFrame):
-    return df.drop(return_numerical_columns(df).columns.values, axis=1)
+def return_str_columns(df: DataFrame, result_column: DataFrame, include: [] = None):
+    return df.drop(return_numerical_columns(df, result_column, exclude=include).columns.values, axis=1)
 
 
 class DatasetReader:
