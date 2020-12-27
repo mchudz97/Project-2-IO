@@ -16,7 +16,8 @@ def return_numerical_columns(df: DataFrame, result_column: DataFrame,  exclude: 
 
 
 def return_str_columns(df: DataFrame, result_column: DataFrame, include: [] = None):
-    return df.drop(return_numerical_columns(df, result_column, exclude=include).columns.values, axis=1)
+    return df.drop(return_numerical_columns(df, result_column, exclude=include).columns.values, axis=1)\
+        .join(result_column)
 
 
 class DatasetReader:

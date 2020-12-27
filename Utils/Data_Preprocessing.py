@@ -8,7 +8,6 @@ def reduce_null_columns(data: pd.DataFrame, max_percentage_of_nulls: float):
     df = data.copy()
     print(f'Reduced from {df.shape[1]}')
     for column in df:
-
         if df[column].isna().sum() / df[column].shape[0] >= max_percentage_of_nulls:
             df = df.drop(column, axis=1)
 
