@@ -28,7 +28,7 @@ def fill_nulls_with_medians(df: pd.DataFrame, numeric_df: pd.DataFrame, y_name: 
         if len(df.groupby(y_name)[col]) >= 2:
             df_num[col] = df[col].fillna(df.groupby(y_name)[col].transform('mean'))
         else:
-            df_num[col] = df[col].fillna(df[col].median)
+            df_num[col] = df[col].fillna(df[col].median())
 
     return df_num
 
@@ -55,6 +55,7 @@ def create_encoded_df(df_str: pd.DataFrame):
     ohe_df = pd.DataFrame(ohe.transform(df_str).toarray())
     names = ohe.get_feature_names()
     ohe_df.columns = ohe_name_parser(names, df_str)
+
     return ohe_df
 
 
