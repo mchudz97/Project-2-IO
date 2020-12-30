@@ -7,10 +7,11 @@ from Algorithms.Random_Forest import RandomForest
 from Algorithms.Support_Vector_Machines import SupportVectorMachines
 from Utils.DataFrame_Info import null_amount_plot, data_type_plot, column_info_plot, info_about_string_column
 from Utils.Data_Preprocessing import reduce_null_columns, remove_nulls_from_y, fill_nulls_with_medians, \
-    fill_nulls_with_word, create_encoded_df
+    fill_nulls_with_word, create_encoded_df, select_richest_rows
 from Utils.Data_Separator import DataSeparator
 from Utils.Dataset_Reader import DatasetReader, return_numerical_columns, return_str_columns
-from Utils.Results import prediction_correctness
+from Utils.Results import prediction_correctness, conf_matrixes, compare_results_plot, time_plot
+import numpy as np
 
 not_numeric = ['Patient addmited to regular ward (1=yes, 0=no)',
                'Patient addmited to semi-intensive unit (1=yes, 0=no)',
@@ -24,50 +25,42 @@ interesting_columns = ['Patient addmited to regular ward (1=yes, 0=no)',
 Y_NAME = 'SARS-Cov-2 exam result'
 
 data = DatasetReader('dataset.xlsx').return_df_without_first_column()
-null_amount_plot(data)
-data = reduce_null_columns(data, .9)
+# null_amount_plot(data)
+data = reduce_null_columns(data, .95)
 data = remove_nulls_from_y(data, Y_NAME)
-data_numerical = fill_nulls_with_medians(data,
-                                         return_numerical_columns(data,
-                                                                  data[Y_NAME],
-                                                                  not_numeric),
-                                         Y_NAME)
-
+data_numerical = return_numerical_columns(data, data[Y_NAME], not_numeric)
+data_numerical = select_richest_rows(data_numerical, .2)
+# column_info_plot(data_numerical, [Y_NAME])
+# null_amount_plot(data_numerical)
+data_numerical = fill_nulls_with_medians(data_numerical, Y_NAME)
+print(data_numerical.shape)
 
 # column_info_plot(data_numerical, [Y_NAME])
 
 ds = return_str_columns(data, data[Y_NAME], not_numeric)
-data_type_plot(data_numerical, ds)
-data_separator_numeric = DataSeparator(data_numerical, .66, Y_NAME)
-nb = NaiveBayes(data_separator_numeric.X_train, data_separator_numeric.y_train)
-print('nb')
-print(prediction_correctness(data_separator_numeric.y_test, nb.predict(data_separator_numeric.X_test)))
-dt = DecisionTree(data_separator_numeric.X_train, data_separator_numeric.y_train)
-print('dt')
-print(prediction_correctness(data_separator_numeric.y_test, dt.predict(data_separator_numeric.X_test)))
-n3 = NN(data_separator_numeric.X_train, data_separator_numeric.y_train, 3)
-n5 = NN(data_separator_numeric.X_train, data_separator_numeric.y_train, 5)
-n8 = NN(data_separator_numeric.X_train, data_separator_numeric.y_train, 8)
+print(data_numerical[Y_NAME].value_counts())
+# data_type_plot(data_numerical, ds)
+data_sep = DataSeparator(data_numerical, .66, Y_NAME)
+nb = NaiveBayes(data_sep.X_train, data_sep.y_train, data_sep.X_test)
+dt = DecisionTree(data_sep.X_train, data_sep.y_train, data_sep.X_test)
+n3 = NN(data_sep.X_train, data_sep.y_train, data_sep.X_test, 3)
+n5 = NN(data_sep.X_train, data_sep.y_train, data_sep.X_test, 5)
+n11 = NN(data_sep.X_train, data_sep.y_train, data_sep.X_test, 11)
+neural_p = NeuralPerceptron(data_sep.X_train, data_sep.y_train, data_sep.X_test)
+mlp = MultiLayerPerceptron(data_sep.X_train, data_sep.y_train, data_sep.X_test)
+rf = RandomForest(data_sep.X_train, data_sep.y_train, data_sep.X_test)
+svm = SupportVectorMachines(data_sep.X_train, data_sep.y_train, data_sep.X_test)
 
+classifiers = [nb, dt, n3, n5, n11, neural_p, mlp, rf, svm]
 
-print(prediction_correctness(data_separator_numeric.y_test, n3.predict(data_separator_numeric.X_test)))
-print(prediction_correctness(data_separator_numeric.y_test, n5.predict(data_separator_numeric.X_test)))
-print(prediction_correctness(data_separator_numeric.y_test, n8.predict(data_separator_numeric.X_test)))
-neural_p = NeuralPerceptron(data_separator_numeric.X_train, data_separator_numeric.y_train)
-print('neural_p')
-print(prediction_correctness(data_separator_numeric.y_test, neural_p.predict(data_separator_numeric.X_test)))
-mlp = MultiLayerPerceptron(data_separator_numeric.X_train, data_separator_numeric.y_train)
-print('mlp')
-print(prediction_correctness(data_separator_numeric.y_test, mlp.predict(data_separator_numeric.X_test)))
-rf = RandomForest(data_separator_numeric.X_train, data_separator_numeric.y_train)
-print('rf')
-print(prediction_correctness(data_separator_numeric.y_test, rf.predict(data_separator_numeric.X_test)))
-svm = SupportVectorMachines(data_separator_numeric.X_train, data_separator_numeric.y_train)
-print('svm')
-print(prediction_correctness(data_separator_numeric.y_test, svm.predict(data_separator_numeric.X_test)))
+results = [x.predicted for x in classifiers]
+time_plot([x.time for x in classifiers])
+conf_matrixes(results, data_sep.y_test)
+
+compare_results_plot(results, data_sep.y_test)
 
 ds = fill_nulls_with_word(ds, 'not_tested')
-print(info_about_string_column(ds, 'Respiratory Syncytial Virus'))
+print(ds.shape)
 ds_sliced = ds[interesting_columns]
 enc = create_encoded_df(ds_sliced)
 ar = AssociationRules(enc)

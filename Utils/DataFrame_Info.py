@@ -45,19 +45,20 @@ def column_info_plot(num_df: pd.DataFrame, not_num_col: []):
         info['avg'].append(single_info[2])
 
     to_df = pd.DataFrame.from_dict(info)
-    x = np.arange(len(num_df_cp.columns))
-    width = .5
-    fig, ax = plt.subplots()
-    ax.bar(x=to_df.index, height=to_df['max'], label='Max', color='r', width=width)
-    ax.bar(x=to_df.index, height=to_df['min'], label='Min', color='b', width=width)
-    ax.bar(x=to_df.index, height=to_df['avg'], label='Mean', color='y', width=width)
-    ax.set_ylabel('value')
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels=[''.join([y[0] for y in x.split()]) for x in num_df_cp.columns.tolist()],
-                       rotation=90)
-    ax.legend()
-
-    plt.show()
+    to_df.to_csv('num_info.csv')
+    # x = np.arange(len(num_df_cp.columns))
+    # width = .5
+    # fig, ax = plt.subplots()
+    # ax.bar(x=to_df.index, height=to_df['max'], label='Max', color='r', width=width)
+    # ax.bar(x=to_df.index, height=to_df['min'], label='Min', color='b', width=width)
+    # ax.bar(x=to_df.index, height=to_df['avg'], label='Mean', color='y', width=width)
+    # ax.set_ylabel('value')
+    # ax.set_xticks(x)
+    # ax.set_xticklabels(labels=[''.join([y[0] for y in x.split()]) for x in num_df_cp.columns.tolist()],
+    #                    rotation=90)
+    # ax.legend()
+    #
+    # plt.show()
 
 
 def info_about_string_column(df: pd.DataFrame, column_identity: str):

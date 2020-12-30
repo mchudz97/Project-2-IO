@@ -20,15 +20,20 @@ def remove_nulls_from_y(data: pd.DataFrame, y_name):
     return data.dropna(subset=[y_name])
 
 
-def fill_nulls_with_medians(df: pd.DataFrame, numeric_df: pd.DataFrame, y_name: str):
+def select_richest_rows(df: pd.DataFrame, min_percent_of_data: float):
+    return df.loc[df.notna().sum(1)/df.shape[1] >= min_percent_of_data]
+
+
+def fill_nulls_with_medians(numeric_df: pd.DataFrame, y_name: str):
     df_num = numeric_df.copy()
     for col in numeric_df.columns.values:
         if col == y_name:
             continue
-        if len(df.groupby(y_name)[col]) >= 2:
-            df_num[col] = df[col].fillna(df.groupby(y_name)[col].transform('mean'))
+        if len(numeric_df.groupby(y_name)[col]) >= 2:
+            df_num[col] = numeric_df[col]\
+                .fillna(numeric_df.groupby(y_name)[col].transform('mean'))
         else:
-            df_num[col] = df[col].fillna(df[col].median())
+            df_num[col] = numeric_df[col].fillna(numeric_df[col].median())
 
     return df_num
 
